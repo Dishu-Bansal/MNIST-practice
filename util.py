@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def get_normalized_data():
 
-    df = pd.read_csv('large-files/train.csv')
+    df = pd.read_csv('large/train.csv')
     data = df.to_numpy().astype(np.float32)
     np.random.shuffle(data)
     X = data[:, 1:]
@@ -78,3 +79,73 @@ def y2indicator(y):
     for i in range(N):
         ind[i, y[i]] = 1
     return ind
+
+def linear_benchmark():
+    Xtrain, Xtest, Ytrain, Ytest = get_normalized_data()
+
+    print("Performing Logistic Regression...")
+
+    # Convert Ytrain and Ytest to (N x K) matrices of indicator variables
+    N, D = Xtrain.shape
+    Ytrain_ind = y2indicator(Ytrain)
+    Ytest_ind = y2indicator(Ytest)
+    K = Ytrain_ind.shape[1]
+
+    W = np.random.randn(D, K) / np.sqrt(D)
+    b = np.zeros(K)
+    train_losses = []
+    test_losses = []
+    train_classification_errors = []
+    test_classification_errors = []
+
+    # reg = 1
+    # learning rate 0.0001 is too high, 0.00005 is also too high
+    # 0.00003 / 2000 iterations => 0.363 error, -7630 cost
+    # 0.00004 / 1000 iterations => 0.295 error, -7902 cost
+    # 0.00004 / 2000 iterations => 0.321 error, -7528 cost
+
+    # reg = 0.1, still around 0.31 error
+    # reg = 0.01, still around 0.31 error
+    lr = 0.00003
+    reg = 0.0
+    n_iters = 100
+    for i in range(n_iters):
+        p_y = forward(Xtrain, W, b)
+        train_loss = cost(p_y, Ytrain_ind)
+        train_losses.append(train_loss)
+
+        train_err = error_rate(p_y, Ytrain)
+        train_classification_errors.append(train_err)
+
+        p_y_test = forward(Xtest, W, b)
+        test_loss = cost(p_y_test, Ytest_ind)
+        test_losses.append(test_loss)
+
+        test_err = error_rate(p_y_test, Ytest)
+        test_classification_errors.append(test_err)
+
+        W += lr*(gradW(Ytrain_ind, p_y, Xtrain) - reg*W)
+        b += lr*gradb(Ytrain_ind, p_y)
+        if (i + 1) % 10 == 0:
+            print(f"Iter: {i+1}/{n_iters}, Train loss: {train_loss:.3f}"
+                  f"Train error: {train_err:.3f}, Test loss: {test_loss:.3f}"
+                  f"Test err: {test_err:.3f}")
+    
+    p_y = forward(Xtest, W, b)
+    print("Final error rate:", error_rate(p_y, Ytest))
+
+    plt.plot(train_losses, label="Train Loss")
+    plt.plot(test_losses, label='Test loss')
+    plt.title("Loss per iteration")
+    plt.legend()
+    plt.show()
+
+    plt.plot(train_classification_errors, label='Train error')
+    plt.plot(test_classification_errors, label="Test error")
+    plt.title('Classification Error per iteration')
+    plt.legend()
+    plt.show()
+
+
+if __name__ == '__main__':
+    linear_benchmark()

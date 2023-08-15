@@ -127,8 +127,8 @@ def linear_benchmark():
         W += lr*(gradW(Ytrain_ind, p_y, Xtrain) - reg*W)
         b += lr*gradb(Ytrain_ind, p_y)
         if (i + 1) % 10 == 0:
-            print(f"Iter: {i+1}/{n_iters}, Train loss: {train_loss:.3f}"
-                  f"Train error: {train_err:.3f}, Test loss: {test_loss:.3f}"
+            print(f"Iter: {i+1}/{n_iters}, Train loss: {train_loss:.3f} "
+                  f"Train error: {train_err:.3f}, Test loss: {test_loss:.3f} "
                   f"Test err: {test_err:.3f}")
     
     p_y = forward(Xtest, W, b)

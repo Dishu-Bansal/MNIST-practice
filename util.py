@@ -83,7 +83,7 @@ def y2indicator(y):
 def linear_benchmark():
     Xtrain, Xtest, Ytrain, Ytest = get_normalized_data()
 
-    print("Performing Logistic Regression...")
+    print("Doing Logistic Regression...")
 
     # Convert Ytrain and Ytest to (N x K) matrices of indicator variables
     N, D = Xtrain.shape
